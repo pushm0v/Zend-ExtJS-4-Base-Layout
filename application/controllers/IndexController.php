@@ -52,5 +52,10 @@ class IndexController extends Zend_Controller_Action
     }
 
 
+    public function submenu1Action()
+    {
+    	// Disable layout..	
+		$this->_helper->layout->disableLayout();
+	}
 }
 

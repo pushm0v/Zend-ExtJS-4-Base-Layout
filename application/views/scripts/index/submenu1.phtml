@@ -1,0 +1,29 @@
+<script type="text/javascript">
+var panel = Ext.create("Ext.Panel",{
+    title: 'My Panel',
+    autoHeight: true,
+    defaults: {
+        anchor: '100%'
+    },
+    items: [
+        {
+            xtype: 'textfield',
+            fieldLabel: 'My Form'
+        }
+    ]
+});
+
+var viewport =  ({
+    id: 'window-panel',
+    border: true,
+    minWidth: 300,
+    minHeight: 200,
+    loadMask: true,
+    layout: 'fit',
+    items: [panel]
+});
+
+centerRegion = Ext.getCmp('content-panel');
+centerRegion.removeAll();
+centerRegion.add(viewport);
+</script>

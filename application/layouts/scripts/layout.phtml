@@ -1,0 +1,148 @@
+<html>
+<head>
+<link href="/assets/extjs42/resources/css/ext-all-neptune.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/assets/extjs42/resources/css/fonts.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/assets/fam/silk.css" media="screen" rel="stylesheet" type="text/css" />
+<title>Your title Goes Here</title>
+<script type="text/javascript" src="/assets/extjs42/ext-all.js"></script>
+<script type="text/javascript">
+
+Ext.Loader.setConfig({
+    enabled: true,
+    disableCaching: false,
+    paths: {
+        "Ext": "/assets/extjs42/src",
+        "Ext.ux": "/assets/extjs42/ux/"
+    }
+});
+
+Ext.onReady(function(){
+
+    Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+
+    // Sencha bug in generating row numbers
+    // Override rownumberer to show correct numbers when paging
+   Ext.grid.RowNumberer.override({
+       renderer: function (value, metaData, record, rowIdx, colIdx, store) {
+           var rowspan = this.rowspan;
+           if (rowspan) {
+               metaData.tdAttr = 'rowspan="' + rowspan + '"';
+           }
+
+
+           metaData.tdCls = Ext.baseCSSPrefix + 'grid-cell-special';
+           var options = store.lastOptions;
+           return ((options && options.start) ? options.start : 0) + rowIdx + 1;
+       }
+   });
+
+    var menuPanel = Ext.create('Ext.Panel', {
+        region:'west',
+        id:'treemenu-panel',
+        title:'Main Menu',
+        split:true,
+        width: 200,
+        minSize: 175,
+        maxSize: 400,
+        collapsible: true,
+        layout:'accordion',
+        layoutConfig:{
+            animate:true
+        },
+        items: []
+    });
+
+    var appMenu = Ext.create('Ext.tree.Panel', {
+        id: 'tree-menu',
+        title: 'Your Menu',
+        split: true,
+        minSize: 150,
+        rootVisible: false,
+        autoScroll: true,
+        store: Ext.create('Ext.data.TreeStore',{
+            root: {
+                expanded: true,
+                id: 'node'
+            },
+            proxy: {
+                type: 'ajax',
+                url: '/index/menu'
+            },
+            folderSort: true,
+            sorters: [{
+                property: 'text',
+                direction: 'ASC'
+            }]
+        }),
+        listeners:{
+            itemclick: function(view, record, item, index, e, opts){
+
+                if (record.get('leaf')) {
+                    Ext.getCmp('content-panel').removeAll();
+                    dynamicPanel = Ext.create('Ext.Component',{
+                        loader: {
+                            url: record.raw.link,
+                            renderer: 'html',
+                            autoLoad: true,
+                            scripts: true
+                        }
+                    });
+                    Ext.getCmp('content-panel').add(dynamicPanel);
+                }
+            }
+        }
+    });
+
+    menuPanel.add(appMenu);
+
+    var start = {
+        id: 'start-panel',
+        title: 'Dashboard',
+        layout: 'fit',
+        bodyStyle: 'padding:25px',
+        contentEl: 'center'
+    };
+
+    var contentPanel = Ext.create('Ext.Panel', {
+        id: 'content-panel',
+        region: 'center',
+        layout: 'fit',
+        activeItem: 0,
+        border: false,
+        items: [start]
+    });
+
+    var viewport = Ext.create('Ext.Viewport',{
+        id: 'viewport',
+        layout:'border',
+        loadMask: true,
+        items:[
+            menuPanel,
+            contentPanel
+        ],
+        listeners: {
+            'afterrender': function(){
+            }
+        }
+    });
+
+    Ext.require([
+        'Ext.grid.*',
+        'Ext.data.*',
+        'Ext.util.*',
+        'Ext.state.*',
+        'Ext.form.*'
+    ]);
+
+});
+</script>
+</head>
+<body>
+<div id="center">
+    <br /><br />
+    <div id="view-content">
+        <?=$this->layout()->content?>
+    </div>
+</div>
+</body>
+</html>
